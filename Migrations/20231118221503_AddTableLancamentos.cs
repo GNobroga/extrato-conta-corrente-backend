@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace backend.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateTabelaLancamento : Migration
+    public partial class AddTableLancamentos : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,7 @@ namespace backend.Migrations
                 {
                     LancamentoId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Descricao = table.Column<string>(type: "text", nullable: false),
+                    Descricao = table.Column<string>(type: "text", nullable: true),
                     Data = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Valor = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
                     Avulso = table.Column<bool>(type: "boolean", nullable: false),

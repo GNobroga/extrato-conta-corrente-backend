@@ -1,4 +1,3 @@
-using System.Net;
 using backend.Models;
 using Microsoft.AspNetCore.Diagnostics;
 
@@ -21,8 +20,6 @@ public static class ApiExceptionMiddlewareExtensions
                     context.Response.ContentType = "application/json";
                     await context.Response.WriteAsync(exception.ToString());
                 }
-
-
             });
 
         });

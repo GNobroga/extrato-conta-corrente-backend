@@ -1,5 +1,7 @@
+using AutoMapper;
 using backend.Data;
 using backend.Extensions;
+using backend.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +13,16 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDbContext<AppDbContext>(options => {
     options.UseNpgsql(builder.Configuration.GetConnectionString("AppConnection"));
 });
+
+var mapperConfig = new MapperConfiguration(cfg => {
+    cfg.CreateMap<Lancamento, LancamentoDTO>();
+    cfg.CreateMap<LancamentoDTO, Lancamento>();
+});
+
+var mapper = new Mapper(mapperConfig);
+
+builder.Services.AddSingleton<IMapper>(mapper);
+
 
 builder.Services.AddControllers();
 
