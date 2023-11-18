@@ -13,7 +13,7 @@ public class LancamentosController : ControllerBase
     readonly AppDbContext _context;
     readonly IMapper _mapper;
 
-    public LancamentosController(AppDbContext context, IMapper mapper) 
+    public LancamentosController(AppDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
@@ -24,7 +24,7 @@ public class LancamentosController : ControllerBase
     {
         var lancamento = _context.Lancamentos.FirstOrDefault(l => l.LancamentoId == id);
 
-        if (lancamento != null) 
+        if (lancamento != null)
         {
             return Ok(_mapper.Map<Lancamento, LancamentoDTO>(lancamento));
         }
@@ -33,8 +33,8 @@ public class LancamentosController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<Lancamento> Post([FromBody] LancamentoDTO dto) 
-    {   
+    public ActionResult<Lancamento> Post([FromBody] LancamentoDTO dto)
+    {
         dto.LancamentoId = null;
 
         var novoLancamento = _mapper.Map<LancamentoDTO, Lancamento>(dto);
@@ -43,17 +43,18 @@ public class LancamentosController : ControllerBase
 
         _context.SaveChanges();
 
-        return new CreatedAtRouteResult("Encontrar", new {
+        return new CreatedAtRouteResult("Encontrar", new
+        {
             id = novoLancamento.LancamentoId
         }, novoLancamento);
     }
 
 
     [HttpDelete("{id:int}")]
-    public ActionResult Cancelar(int id) 
+    public ActionResult Cancelar(int id)
     {
         var lancamento = _context.Lancamentos.FirstOrDefault(l => l.LancamentoId == id) ?? throw new AppException("Não foi encontrado lançamento com este id para ser cancelado.");
-        
+
         if (!lancamento.Avulso || lancamento.Status != "Válido")
             throw new AppException("Lançamento não qualificado para cancelamento.");
 
@@ -66,8 +67,12 @@ public class LancamentosController : ControllerBase
 
 
     [HttpPut("{id:int}")]
-    public ActionResult<Lancamento> Put(int id, [FromBody] LancamentoDTO dto)
-    {   
+    public ActionResult<Lancamento> Put(int id, LancamentoDTO dto)
+    {
+        if (dto.LancamentoId != id) {
+            throw new AppException("O objeto passado possui Id diferente do especificado na Url");
+        }
+
         var lancamento = _context.Lancamentos.FirstOrDefault(l => l.LancamentoId == id);
 
         if (lancamento is null) return NotFound();
@@ -80,25 +85,26 @@ public class LancamentosController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Lancamento>> GetLancamentos() => Ok(_context.Lancamentos);
+    public ActionResult<IEnumerable<Lancamento>> GetLancamentos() => 
+        Ok(_context.Lancamentos.AsNoTracking().Select(l => _mapper.Map<Lancamento, LancamentoDTO>(l)));
 
 
     [HttpGet("alcance")]
-    public ActionResult<IEnumerable<Lancamento>> FindByDate(DateTime abaixo = default, DateTime acima = default) 
-    {   
+    public ActionResult<IEnumerable<Lancamento>> FindByDate(DateTime abaixo = default, DateTime acima = default)
+    {
         var currentData = DateTime.Now.AddDays(-2);
 
         IEnumerable<Lancamento> todos = _context.Lancamentos.OrderBy(l => l.LancamentoId).AsNoTracking();
 
         IEnumerable<Lancamento> lancamentos = todos.Where(l => l.Data.Date >= currentData.Date);
 
-        if (abaixo != DateTime.MinValue) 
+        if (abaixo != DateTime.MinValue)
             lancamentos = todos.Where(l => l.Data.Date >= abaixo.Date);
-        
-        if (acima != DateTime.MinValue) 
+
+        if (acima != DateTime.MinValue)
         {
             if (acima.Date < abaixo.Date) throw new AppException("A data do limite superior é abaixo da data no limite inferior.");
-            
+
             lancamentos = lancamentos.Where(l => l.Data.Date <= acima.Date);
         }
 
@@ -118,6 +124,6 @@ public class LancamentosController : ControllerBase
 
         _context.SaveChanges();
 
-        return CreatedAtRoute("FindOne", new { id = lancamento.LancamentoId }, lancamento);
+        return CreatedAtRoute("Encontrar", new { id = lancamento.LancamentoId }, lancamento);
     }
 }
