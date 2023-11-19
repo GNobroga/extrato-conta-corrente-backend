@@ -20,7 +20,7 @@ public class LancamentosController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<Lancamento> Inserir([FromBody] LancamentoDTO dto)
+    public ActionResult<Lancamento> Inserir(LancamentoDTO dto)
     {
         var inserido = _service.Inserir(dto);
         return new CreatedAtRouteResult("Encontrar", new { id = inserido.LancamentoId }, inserido);
@@ -52,7 +52,7 @@ public class LancamentosController : ControllerBase
     }
 
     [HttpPost("avulsos")]
-    public ActionResult<LancamentoDTO> InserirNaoAvulso([FromBody] LancamentoDTO dto)
+    public ActionResult<LancamentoDTO> InserirNaoAvulso(LancamentoDTO dto)
     {
         var inserido = _service.InserirAvulso(dto);
 
