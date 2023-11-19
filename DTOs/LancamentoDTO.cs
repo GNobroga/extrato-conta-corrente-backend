@@ -11,7 +11,7 @@ public class LancamentoDTO
     
     public string? Descricao { get; set; }
 
-    public DateTime Data { get; set; }
+    public DateTime? Data { get; set; }
 
     public decimal Valor { get; set; }
 

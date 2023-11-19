@@ -12,8 +12,8 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Lancamento>()
-            .Property(l => l.Data)
-            .HasConversion(v => DateTime.SpecifyKind(v, DateTimeKind.Utc), (v) => v);
+        // modelBuilder.Entity<Lancamento>()
+        //     .Property(l => l.Data)
+        //     .HasConversion(v => DateTime.SpecifyKind(v, DateTimeKind.Utc), (v) => v);
     }
 }

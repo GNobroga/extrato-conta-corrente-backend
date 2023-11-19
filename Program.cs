@@ -2,6 +2,8 @@ using AutoMapper;
 using backend.Data;
 using backend.Extensions;
 using backend.Models;
+using backend.Services;
+using backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,10 +23,11 @@ var mapperConfig = new MapperConfiguration(cfg => {
 
 var mapper = new Mapper(mapperConfig);
 
+builder.Services.AddControllers();
+
 builder.Services.AddSingleton<IMapper>(mapper);
 
-
-builder.Services.AddControllers();
+builder.Services.AddScoped<ILancamentoService, LancamentoServiceImpl>();
 
 var app = builder.Build();
 

@@ -1,8 +1,6 @@
-using AutoMapper;
-using backend.Data;
 using backend.Models;
+using backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
 
@@ -10,120 +8,54 @@ namespace backend.Controllers;
 [ApiController]
 public class LancamentosController : ControllerBase
 {
-    readonly AppDbContext _context;
-    readonly IMapper _mapper;
+    private readonly ILancamentoService _service;
 
-    public LancamentosController(AppDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    public LancamentosController(ILancamentoService service) => _service = service;
+
 
     [HttpGet("{id:int}", Name = "Encontrar")]
-    public ActionResult<Lancamento> Get(int id)
+    public ActionResult<LancamentoDTO> Obter(int id)
     {
-        var lancamento = _context.Lancamentos.FirstOrDefault(l => l.LancamentoId == id);
-
-        if (lancamento != null)
-        {
-            return Ok(_mapper.Map<Lancamento, LancamentoDTO>(lancamento));
-        }
-
-        return NotFound();
+        return _service.Obter(id);
     }
 
     [HttpPost]
-    public ActionResult<Lancamento> Post([FromBody] LancamentoDTO dto)
+    public ActionResult<Lancamento> Inserir([FromBody] LancamentoDTO dto)
     {
-        dto.LancamentoId = null;
-
-        var novoLancamento = _mapper.Map<LancamentoDTO, Lancamento>(dto);
-
-        _context.Add(novoLancamento);
-
-        _context.SaveChanges();
-
-        return new CreatedAtRouteResult("Encontrar", new
-        {
-            id = novoLancamento.LancamentoId
-        }, novoLancamento);
+        var inserido = _service.Inserir(dto);
+        return new CreatedAtRouteResult("Encontrar", new { id = inserido.LancamentoId }, inserido);
     }
 
 
     [HttpDelete("{id:int}")]
-    public ActionResult Cancelar(int id)
+    public ActionResult<LancamentoDTO> Cancelar(int id)
     {
-        var lancamento = _context.Lancamentos.FirstOrDefault(l => l.LancamentoId == id) ?? throw new AppException("Não foi encontrado lançamento com este id para ser cancelado.");
-
-        if (!lancamento.Avulso || lancamento.Status != "Válido")
-            throw new AppException("Lançamento não qualificado para cancelamento.");
-
-        lancamento.Status = "Cancelado";
-
-        _context.SaveChanges();
-
-        return Ok(lancamento);
+        _service.Cancelar(id);
+        return Ok();
     }
 
 
     [HttpPut("{id:int}")]
-    public ActionResult<Lancamento> Put(int id, LancamentoDTO dto)
+    public ActionResult<LancamentoDTO> Modificar(int id, LancamentoDTO dto)
     {
-        if (dto.LancamentoId != id) {
-            throw new AppException("O objeto passado possui Id diferente do especificado na Url");
-        }
-
-        var lancamento = _context.Lancamentos.FirstOrDefault(l => l.LancamentoId == id);
-
-        if (lancamento is null) return NotFound();
-
-        _mapper.Map(dto, lancamento);
-
-        _context.SaveChanges();
-
-        return Ok(lancamento);
+        return Ok(_service.Modificar(id, dto));
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Lancamento>> GetLancamentos() => 
-        Ok(_context.Lancamentos.AsNoTracking().Select(l => _mapper.Map<Lancamento, LancamentoDTO>(l)));
+    public ActionResult<IEnumerable<LancamentoDTO>> Listar() => Ok(_service.Listar());
 
 
     [HttpGet("alcance")]
-    public ActionResult<IEnumerable<Lancamento>> FindByDate(DateTime abaixo = default, DateTime acima = default)
+    public ActionResult<IEnumerable<LancamentoDTO>> EncontrarPorData(DateTime abaixo = default, DateTime acima = default)
     {
-        var currentData = DateTime.Now.AddDays(-2);
-
-        IEnumerable<Lancamento> todos = _context.Lancamentos.OrderBy(l => l.LancamentoId).AsNoTracking();
-
-        IEnumerable<Lancamento> lancamentos = todos.Where(l => l.Data.Date >= currentData.Date);
-
-        if (abaixo != DateTime.MinValue)
-            lancamentos = todos.Where(l => l.Data.Date >= abaixo.Date);
-
-        if (acima != DateTime.MinValue)
-        {
-            if (acima.Date < abaixo.Date) throw new AppException("A data do limite superior é abaixo da data no limite inferior.");
-
-            lancamentos = lancamentos.Where(l => l.Data.Date <= acima.Date);
-        }
-
-        return Ok(lancamentos.Select(l => _mapper.Map<Lancamento, LancamentoDTO>(l)));
+        return Ok(_service.EncontrarPorData(abaixo, acima));
     }
 
     [HttpPost("avulsos")]
-    public ActionResult InserirNaoAvulso([FromBody] LancamentoDTO dto)
+    public ActionResult<LancamentoDTO> InserirNaoAvulso([FromBody] LancamentoDTO dto)
     {
-        dto.LancamentoId = null;
-        dto.Status = "Válido";
-        dto.Avulso = false;
+        var inserido = _service.InserirAvulso(dto);
 
-        var lancamento = _mapper.Map<LancamentoDTO, Lancamento>(dto);
-
-        _context.Lancamentos.Add(lancamento);
-
-        _context.SaveChanges();
-
-        return CreatedAtRoute("Encontrar", new { id = lancamento.LancamentoId }, lancamento);
+        return CreatedAtRoute("Encontrar", new { id = inserido.LancamentoId }, inserido);
     }
 }
