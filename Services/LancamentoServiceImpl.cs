@@ -3,10 +3,8 @@ using AutoMapper;
 using backend.Data;
 using backend.Models;
 using backend.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.OpenApi.Expressions;
+
 
 namespace backend.Services;
 

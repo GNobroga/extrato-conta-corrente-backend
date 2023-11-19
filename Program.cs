@@ -12,11 +12,13 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddDbContext<AppDbContext>(options => {
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
     options.UseNpgsql(builder.Configuration.GetConnectionString("AppConnection"));
 });
 
-var mapperConfig = new MapperConfiguration(cfg => {
+var mapperConfig = new MapperConfiguration(cfg =>
+{
     cfg.CreateMap<Lancamento, LancamentoDTO>();
     cfg.CreateMap<LancamentoDTO, Lancamento>();
 });
@@ -31,7 +33,7 @@ builder.Services.AddScoped<ILancamentoService, LancamentoServiceImpl>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment()) 
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
