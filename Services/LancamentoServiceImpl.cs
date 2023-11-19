@@ -35,7 +35,7 @@ public class LancamentoServiceImpl : ILancamentoService
     {
         var currentData = DateTime.Now.AddDays(-2);
 
-        IEnumerable<Lancamento> todos = _context.Lancamentos.OrderBy(l => l.LancamentoId).AsNoTracking();
+        IEnumerable<Lancamento> todos = _context.Lancamentos.AsNoTracking();
 
         IEnumerable<Lancamento> lancamentos = todos.Where(l => l.Data.Date >= currentData.Date);
 
@@ -49,7 +49,7 @@ public class LancamentoServiceImpl : ILancamentoService
             lancamentos = lancamentos.Where(l => l.Data.Date <= acima.Date);
         }
 
-        return lancamentos.Select(l => _mapper.Map<Lancamento, LancamentoDTO>(l));
+        return lancamentos.OrderBy(l => l.LancamentoId).Select(l => _mapper.Map<Lancamento, LancamentoDTO>(l));
     }
 
     public LancamentoDTO Inserir(LancamentoDTO dto)

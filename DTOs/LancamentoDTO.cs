@@ -9,6 +9,7 @@ public class LancamentoDTO
     [JsonPropertyName("id")]
     public int? LancamentoId { get; set; }
 
+    [RegularExpression("^[a-zA-Z0-9]*$", ErrorMessage = "A propriedade deve conter apenas caracteres alfanuméricos.")]
     public string? Descricao { get; set; }
 
     public DateTime? Data { get; set; }
